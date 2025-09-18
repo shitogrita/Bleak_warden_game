@@ -1,0 +1,174 @@
+#include "character.h"
+#include <iostream>
+#include <cstdlib>
+
+void Character::restore() {
+    hp = maxHp;
+}
+
+Character rand_stats() {
+    Character hero;
+    hero.strength = 1 + rand() % 3;
+    hero.dex = 1 + rand() % 3;
+    hero.endu = 1 + rand() % 3;
+    hero.level = 0;
+    return hero;
+}
+
+Character createCharacter() {
+    Character hero = rand_stats();
+    hero.classType = type;
+    hero.level = 0;
+
+    switch (type) {
+        case ClassType::Rogue:  // Разбойник
+            hero.weapon = std::make_unique<Weapon>(WeaponRegistry.at("dagger"));
+            hero.maxHp = 4 + hero.endu;
+            break;
+
+        case ClassType::Warrior:  // Воин
+            hero.weapon = std::make_unique<Weapon>(WeaponRegistry.at("sword"));
+            hero.maxHp = 5 + hero.endu;
+            break;
+
+        case ClassType::Barbarian:  // Варвар
+            hero.weapon = std::make_unique<Weapon>(WeaponRegistry.at("club"));
+            hero.maxHp = 6 + hero.endu;
+            break;
+    }
+    hero.hp = hero.maxHp;
+    return hero;
+}
+
+// он повышает уровень, его здоровье восстанавливается до максимума и
+// ему предлагается заменить его текущее оружие на то, что выпало из монстра.
+
+bool checkDex(Character& hero, Monster& m) {
+    return hero.dex > m.dex;
+}
+
+void levelUp(Character& hero, std::unique_ptr<Weaon> dropppedWeapon) {
+    winStreak++;
+    hero.level++;
+    hero.resrorez();
+
+    switch (hero.classType) {
+        case ClassType::Rogue:
+            if (hero.level == 1) {
+                if (checkDex) {hero.strength ++;}
+                // скрытая атака
+                // эффект в бою: +1 урон если dex > dex цели
+            } else if (hero.level == 2) {
+                hero.dex += 1;
+            } else if (hero.level == 3) {
+                // тут надо менять боевку оснвоную и счетчик на количесвто кругов боя и выволдить ак лдругую функцию
+                // яд (урон накапливается каждый ход)
+            }
+            break;
+
+        case ClassType::Warrior:
+            if (hero.level == 1) {
+                if (firstAttack == 0) {
+
+                // порыв к действию (первый ход урон *2)
+                }
+            } else if (hero.level == 2) {
+                // щит (-3 урона, если сила > атакующего)
+            } else if (hero.level == 3) {
+                hero.strength += 1;
+            }
+            break;
+
+        case ClassType::Barbarian:
+            if (hero.level == 1) {
+                // ярость (+2 урона первые 3 хода, потом -1)
+            } else if (hero.level == 2) {
+                // каменная кожа (урон уменьшается на endu)
+            } else if (hero.level == 3) {
+                hero.endu += 1;
+            }
+            break;
+    }
+    if (droppedWeapon) {
+        if (!hero.weapon || droppedweapon->damage > hero.weapon->damage) {
+            hero.weapon = std::move(droppedweapon);
+        }
+    }
+}
+
+
+// добавить эффект
+void Character::addEffect(Effect e, int duration) {
+    for (auto& eff : effects) {
+        if (eff.type == e) {
+            eff.duration = duration;
+            return;
+        }
+    }
+    effects.push_back({e, duration});
+}
+
+// убрать все эффекты
+void Character::clearEffects() {
+    effects.clear();
+}
+
+// модификация урона при атаке
+int Character::applyAttackEffects(const Monster& defender, int baseDamage) {
+    int dmg = baseDamage;
+
+    for (auto& eff : effects) {
+        switch (eff.type) {
+            case Effect::Rage:
+                if (eff.duration != 0) dmg += 2;
+                else dmg -= 1;
+                break;
+            case Effect::HiddenStrike:
+                if (dex > defender.dex) dmg += 1;
+                break;
+            default: break;
+        }
+    }
+    return dmg;
+}
+
+// модификация урона при защите
+int Character::applyDefenseEffects(const Monster& attacker, int incomingDamage) {
+    int dmg = incomingDamage;
+
+    for (auto& eff : effects) {
+        switch (eff.type) {
+            case Effect::Shield:
+                if (strength > attacker.strength) dmg -= 3;
+                break;
+            default: break;
+        }
+    }
+    return std::max(0, dmg);
+}
+
+// эффекты конца раунда
+void Character::applyEndOfRound(Monster& m) {
+    for (auto& eff : effects) {
+        switch (eff.type) {
+            case Effect::Poison:
+                if (eff.duration != 0) {
+                    m.hp -= 1; // отравление врага
+                }
+                break;
+            default: break;
+        }
+    }
+
+    // уменьшаем таймеры
+    for (auto& eff : effects) {
+        if (eff.duration > 0) eff.duration--;
+    }
+
+    // чистим истёкшие эффекты
+    effects.erase(
+        std::remove_if(effects.begin(), effects.end(),
+                       [](const ActiveEffect& e) { return e.duration == 0; }),
+        effects.end()
+    );
+}
