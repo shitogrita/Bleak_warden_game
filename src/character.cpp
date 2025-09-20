@@ -15,15 +15,32 @@ Character rand_stats() {
     return hero;
 }
 
+void Character::printInfo(const Character& hero) {
+    std::cout << "HP: " << hero.hp << std::endl;
+    std::cout << "STRENGTH: " << hero.strength << std::endl;
+    std::cout << "DEX: " << hero.dex << std::endl;
+    std::cout << "ENDD: " << hero.endu << std::endl;
+    std::cout << "LEVEL: " << hero.level << std::endl;
+    std::cout << "MAXHP: " << maxHp << std::endl;
+    auto weapon_info = weapon->id;
+    std::cout << weapon_info << std::endl;
+
+}
+
 Character createCharacter() {
+
+
+    auto type = ClassType::Rogue;
+    /* логика ввода */
     Character hero = rand_stats();
-    hero.classType = type;
-    hero.level = 0;
+    hero.classType = type; // ?
 
     switch (type) {
         case ClassType::Rogue:  // Разбойник
             hero.weapon = std::make_unique<Weapon>(WeaponRegistry.at("dagger"));
             hero.maxHp = 4 + hero.endu;
+            std::cout << "created hero with this chars: " << std::endl;
+            hero.printInfo(hero);
             break;
 
         case ClassType::Warrior:  // Воин
@@ -47,18 +64,21 @@ bool checkDex(Character& hero, Monster& m) {
     return hero.dex > m.dex;
 }
 
-void levelUp(Character& hero, std::unique_ptr<Weaon> dropppedWeapon) {
-    winStreak++;
+bool checkStrength(Character& hero, Monster& m) {
+    return hero.strength > m.strength;
+}
+
+void levelUp(Character& hero, std::unique_ptr<Weapon> droppedWeapon) {
     hero.level++;
-    hero.resrorez();
+    hero.restore();
 
     switch (hero.classType) {
         case ClassType::Rogue:
             if (hero.level == 1) {
-                if (checkDex) {hero.strength ++;}
+                if (checkDex) {hero.strength ++;} // +
                 // скрытая атака
                 // эффект в бою: +1 урон если dex > dex цели
-            } else if (hero.level == 2) {
+            } else if (hero.level == 2) { // +
                 hero.dex += 1;
             } else if (hero.level == 3) {
                 // тут надо менять боевку оснвоную и счетчик на количесвто кругов боя и выволдить ак лдругую функцию
@@ -68,36 +88,51 @@ void levelUp(Character& hero, std::unique_ptr<Weaon> dropppedWeapon) {
 
         case ClassType::Warrior:
             if (hero.level == 1) {
-                if (firstAttack == 0) {
-
+                /* if (firstAttack() == 0) {
+                    // firstAttack = hero.strength + 2; // ?
                 // порыв к действию (первый ход урон *2)
-                }
+                } */
             } else if (hero.level == 2) {
-                // щит (-3 урона, если сила > атакующего)
+                 /* if (checkStrength(hero, )) {
+                     hero.hp += 3;
+                     // щит (-3 урона, если сила > атакующего)
+                    } */
             } else if (hero.level == 3) {
                 hero.strength += 1;
             }
             break;
 
         case ClassType::Barbarian:
-            if (hero.level == 1) {
+            /*if (hero.level == 1) {
+               if (fisrtAttack && c < 3) {
+                    c += 1;
+                    void attack() + 2 ;
+               }
                 // ярость (+2 урона первые 3 хода, потом -1)
             } else if (hero.level == 2) {
+                hero.hp += hero.endu;
                 // каменная кожа (урон уменьшается на endu)
             } else if (hero.level == 3) {
                 hero.endu += 1;
             }
-            break;
+            break; */
     }
     if (droppedWeapon) {
-        if (!hero.weapon || droppedweapon->damage > hero.weapon->damage) {
-            hero.weapon = std::move(droppedweapon);
+        if (!hero.weapon || droppedWeapon->damage > hero.weapon->damage) {
+            hero.weapon = std::move(droppedWeapon);
         }
     }
 }
 
 
-// добавить эффект
+
+
+
+
+
+
+// добавить эффект идея гпт
+
 void Character::addEffect(Effect e, int duration) {
     for (auto& eff : effects) {
         if (eff.type == e) {

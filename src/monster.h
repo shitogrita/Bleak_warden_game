@@ -1,6 +1,5 @@
 #pragma once
 #include "weapon.h"
-#include "weapons_registry.h"
 #include <memory>
 #include <string>
 #include <unordered_map>

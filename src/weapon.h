@@ -1,5 +1,4 @@
 #pragma once
-#include "weapons.h"
 #include <unordered_map>
 #include <string>
 
@@ -12,9 +11,9 @@ struct Weapon {
 };
 
 inline const std::unordered_map<std::string, Weapon> WeaponRegistry = {
-    {"sword",  {"sword",  "Меч",     3, DamageType::Slashing}},
-    {"club",   {"club",   "Дубина",  3, DamageType::Blunt}},
-    {"dagger", {"dagger", "Кинжал",  2, DamageType::Piercing}},
-    {"axe",    {"axe",    "Топор",   4, DamageType::Slashing}},
+    {"sword",  {"Меч",     3, DamageType::Slashing}},
+    {"club",   {"Дубина",  3, DamageType::Blunt}},
+    {"dagger", {"Кинжал",  2, DamageType::Piercing}},
+    {"axe",    {"Топор",   4, DamageType::Slashing}},
 };
 

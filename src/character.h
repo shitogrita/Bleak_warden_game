@@ -44,6 +44,9 @@ struct Character {
     int applyAttackEffects(const Monster& defender, int baseDamage);
     int applyDefenseEffects(const Monster& attacker, int incomingDamage);
     void applyEndOfRound(Monster& m);
+
+    void printInfo(const Character& hero);
+
 };
 
 
@@ -52,3 +55,5 @@ void levelUp(Character& hero, std::unique_ptr<Weapon> droppedWeapon);
 Character rand_stats();
 
 Character createCharacter();
+
+bool checkStrength(Character& hero, Monster& m);

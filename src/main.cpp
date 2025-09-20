@@ -2,5 +2,6 @@
 #include "battle.h"
 
 int main() {
-    createCharacter();
+    auto hero = createCharacter();
+    auto m = spawnNextMonster();
 }
